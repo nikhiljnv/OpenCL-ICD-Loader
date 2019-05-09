@@ -12,9 +12,14 @@ extern int test_program_objects();
 extern int test_image_objects();
 extern int test_sampler_objects();
 extern int test_OpenGL_share();
+<<<<<<< HEAD
 extern int test_release_calls();
 
 extern int test_icd_match();
+=======
+extern int test_Direct3D10_share();
+extern int test_release_calls();
+>>>>>>> d8934c760f385fe98b649095b0b9cc67b79b80a7
 
 int main(int argc, char **argv)
 {

@@ -17,8 +17,9 @@
  */
 
 #include "icd.h"
-#include "icd_windows_hkr.h"
 #include <windows.h>
+#include "icd_windows_hkr.h"
+#include "icd_windows_dxgk.h"
 #include <cfgmgr32.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -51,7 +52,7 @@ static const char OPENCL_REG_SUB_KEY_WOW[] = "OpenCLDriverNameWow";
 #endif
 
 // Do not free the memory returned by this function.
-static const char* GetOpenCLRegKeyName(void)
+const char* GetOpenCLRegKeyName(void)
 {
 #ifdef _WIN64
     return OPENCL_REG_SUB_KEY;
@@ -128,7 +129,7 @@ static bool ReadOpenCLKey(DEVINST dnDevNode)
             goto out;
         }
 
-        if (REG_MULTI_SZ != dwLibraryNameType)
+        if (REG_SZ != dwLibraryNameType)
         {
             KHR_ICD_TRACE("Unexpected registry entry 0x%x! continuing\n", dwLibraryNameType);
             goto out;
@@ -136,7 +137,7 @@ static bool ReadOpenCLKey(DEVINST dnDevNode)
 
         KHR_ICD_TRACE("    Path: %s\n", cszOclPath);
 
-        khrIcdVendorAdd(cszOclPath);
+        AdapterAdd(cszOclPath, ZeroLuid);
 
         bRet = true;
     }

@@ -38,16 +38,13 @@ set (OPENCL_ICD_LOADER_SOURCES
     loader/icd_dispatch.c)
 
 if (WIN32)
-    list (APPEND OPENCL_ICD_LOADER_SOURCES 
-        loader/windows/icd_windows.c
-        loader/windows/icd_windows_hkr.c
-        loader/windows/OpenCL.def
-        loader/windows/OpenCL.rc)
+    list (APPEND OPENCL_ICD_LOADER_SOURCES icd_windows.c icd_windows_hkr.c icd_windows_dxgk.c OpenCL.def OpenCL.rc)
     # Only add the DXSDK include directory if the environment variable is
     # defined.  Since the DXSDK has merged into the Windows SDK, this is
     # only required in rare cases.
     if (DEFINED ENV{DXSDK_DIR})
         include_directories ($ENV{DXSDK_DIR}/Include)
+        include_directories ($ENV{WDK}/km)
     endif ()
 else ()
     list (APPEND OPENCL_ICD_LOADER_SOURCES
