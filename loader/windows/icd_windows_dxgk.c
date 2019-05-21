@@ -67,22 +67,35 @@ bool khrIcdOsVendorsEnumerateDXGK(void)
         PFND3DKMT_ENUMADAPTERS2 pEnumAdapters2 = (PFND3DKMT_ENUMADAPTERS2)GetProcAddress((HMODULE)h, "D3DKMTEnumAdapters2");
         if (!pEnumAdapters2)
         {
+            KHR_ICD_TRACE("Failed to get address of D3DKMTEnumAdapters2\n");
             FreeLibrary(h);
             return FALSE;
         }
+        KHR_ICD_TRACE("Attempting to get the number of available graphics and display adapters\n");
         Status = pEnumAdapters2(&EnumAdapters);
         if (!NT_SUCCESS(Status) && (Status != STATUS_BUFFER_TOO_SMALL))
         {
+            KHR_ICD_TRACE("Failed to get the number of available graphics and display adapters\n");
             FreeLibrary(h);
             return FALSE;
         }
+        
+        KHR_ICD_TRACE("Attempting to get the info for enumerating available graphics and display adapters\n");
         pAdapterInfo = (D3DKMT_ADAPTERINFO*)malloc(sizeof(D3DKMT_ADAPTERINFO)*(EnumAdapters.NumAdapters));
         EnumAdapters.pAdapters = pAdapterInfo;
         Status = pEnumAdapters2(&EnumAdapters);
         if (!NT_SUCCESS(Status))
         {
+            KHR_ICD_TRACE("Failed to get the info for enumerating available graphics and display adapters\n");
             FreeLibrary(h);
             if (pAdapterInfo) free(pAdapterInfo);
+            return FALSE;
+        }
+        PFND3DKMT_QUERYADAPTERINFO pQueryAdapterInfo = (PFND3DKMT_QUERYADAPTERINFO)GetProcAddress((HMODULE)h, "D3DKMTQueryAdapterInfo");
+        if (!pQueryAdapterInfo)
+        {
+            KHR_ICD_TRACE("Failed to get address of D3DKMTQueryAdapterInfo\n");
+            FreeLibrary(h);
             return FALSE;
         }
         const char* cszOpenCLRegKeyName = GetOpenCLRegKeyName();
@@ -112,7 +125,8 @@ bool khrIcdOsVendorsEnumerateDXGK(void)
             QueryAdapterInfo.Type = KMTQAITYPE_QUERYREGISTRY;
             QueryAdapterInfo.pPrivateDriverData = &QueryArgs;
             QueryAdapterInfo.PrivateDriverDataSize = sizeof(QueryArgs);
-            Status = D3DKMTQueryAdapterInfo(&QueryAdapterInfo);
+            KHR_ICD_TRACE("Attempting to retrieve adpater info for adapter handle %x\n", pAdapterInfo[AdapterIndex].hAdapter);
+            Status = pQueryAdapterInfo(&QueryAdapterInfo);
             if (!NT_SUCCESS(Status))
             {
                 // Continue trying to get as much info on each adapter as possible.
