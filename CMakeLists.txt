@@ -41,12 +41,13 @@ if (WIN32)
     list (APPEND OPENCL_ICD_LOADER_SOURCES 
         loader/windows/icd_windows.c
         loader/windows/icd_windows_hkr.c
+        loader/windows/icd_windows_dxgk.c
         loader/windows/OpenCL.def
         loader/windows/OpenCL.rc)
     # Only add the DXSDK include directory if the environment variable is
     # defined.  Since the DXSDK has merged into the Windows SDK, this is
     # only required in rare cases.
-    if (DEFINED ENV{DXSDK_DIR})
+    if (DEFINED ENV{DXSDK_DIR} AND NOT (MINGW OR MSYS OR CYGWIN))
         include_directories ($ENV{DXSDK_DIR}/Include)
     endif ()
 else ()
