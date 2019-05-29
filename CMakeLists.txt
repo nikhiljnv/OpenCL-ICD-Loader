@@ -49,6 +49,7 @@ if (WIN32)
     # only required in rare cases.
     if (DEFINED ENV{DXSDK_DIR} AND NOT (MINGW OR MSYS OR CYGWIN))
         include_directories ($ENV{DXSDK_DIR}/Include)
+        include_directories ($ENV{WDK}/km)
     endif ()
 else ()
     list (APPEND OPENCL_ICD_LOADER_SOURCES
