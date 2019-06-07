@@ -1842,11 +1842,6 @@ CL_API_ENTRY cl_int CL_API_CALL clGetGLContextInfoKHR(
 
     // determine the platform to use from the properties specified
     khrIcdContextPropertiesGetPlatform(properties, &platform);
-    // determine the platform to use from the device_type specified
-    if (!platform)
-    {
-        khrIcdDeviceTypeGetPlatform(device_type, &platform);
-    }
     if (!platform && khrIcdVendors != NULL)
     {
         platform = khrIcdVendors[0].platform;
