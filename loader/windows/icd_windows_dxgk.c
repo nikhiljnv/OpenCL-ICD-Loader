@@ -71,6 +71,8 @@ bool khrIcdOsVendorsEnumerateDXGK(void)
             }
             break;
         }
+        
+        KHR_ICD_TRACE("Attempting to get the info for enumerating available graphics and display adapters\n");
         pAdapterInfo = (D3DKMT_ADAPTERINFO*)malloc(sizeof(D3DKMT_ADAPTERINFO)*(EnumAdapters.NumAdapters));
         if (pAdapterInfo == NULL)
         {
@@ -111,7 +113,8 @@ bool khrIcdOsVendorsEnumerateDXGK(void)
             QueryAdapterInfo.Type = KMTQAITYPE_QUERYREGISTRY;
             QueryAdapterInfo.pPrivateDriverData = &QueryArgs;
             QueryAdapterInfo.PrivateDriverDataSize = sizeof(QueryArgs);
-            Status = D3DKMTQueryAdapterInfo(&QueryAdapterInfo);
+            KHR_ICD_TRACE("Attempting to retrieve adpater info for adapter handle %x\n", pAdapterInfo[AdapterIndex].hAdapter);
+            Status = pQueryAdapterInfo(&QueryAdapterInfo);
             if (!NT_SUCCESS(Status))
             {
                 // Continue trying to get as much info on each adapter as possible.
@@ -125,7 +128,15 @@ bool khrIcdOsVendorsEnumerateDXGK(void)
                 memcpy(pQueryBuffer, &QueryArgs, sizeof(D3DDDI_QUERYREGISTRY_INFO));
                 QueryAdapterInfo.pPrivateDriverData = pQueryBuffer;
                 QueryAdapterInfo.PrivateDriverDataSize = QueryBufferSize;
-                Status = D3DKMTQueryAdapterInfo(&QueryAdapterInfo);
+                KHR_ICD_TRACE("Attempting to retrieve adpater info for adapter handle %x\n", pAdapterInfo[AdapterIndex].hAdapter);
+                Status = pQueryAdapterInfo(&QueryAdapterInfo);
+                if (!NT_SUCCESS(Status))
+                {
+                    KHR_ICD_TRACE("Failed to retrieve adpater info for adapter handle %x, continuing with next adapater\n", pAdapterInfo[AdapterIndex].hAdapter);            
+                    // Continue trying to get as much info on each adapter as possible.
+                    // It's too late to return FALSE and claim WDDM2_4 enumeration is not available here.
+                    continue;
+                }
                 pQueryArgs = pQueryBuffer;
             }
             if (NT_SUCCESS(Status) && pQueryArgs->Status == D3DDDI_QUERYREGISTRY_STATUS_SUCCESS)
